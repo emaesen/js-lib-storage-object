@@ -1,0 +1,18 @@
+{
+	"name": "js-lib-storage-object",
+	"version": "0.1.0",
+	"description": "JavaScript library object to store and retrieve data from either localStorage, sessionStorage or memory",
+	"scripts": {
+		"test:cmd": "mocha --require mock-local-storage",
+		"test": "live-server --port=9000 --mount=/:public",
+		"start": "npm run test"
+	},
+	"author": "Edward Maesen",
+	"license": "MIT",
+	"devDependencies": {
+		"chai": "^4.2.0",
+		"live-server": "^1.2.0",
+		"mocha": "^5.2.0",
+		"mock-local-storage": "^1.1.7"
+	}
+}
