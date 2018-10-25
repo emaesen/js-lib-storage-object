@@ -436,4 +436,125 @@ describe('Storage Object', function() {
 		});
 	});
 
+	describe('should support storage type config', function() {
+
+		describe('should support config of local storage', function() {
+
+			it('should set configured storage type to local storage', function() {
+				// housekeeping, make sure we start with a clean slate
+				storage.clearLocal();
+				delete storage._type;
+
+				storage.setType('local');
+				expect(storage._type).to.equal('local');
+				expect(storage._getDaStorage()).to.equal(localStorage);
+			});
+
+			it('should set data in configured (local) storage by key', function() {
+				storage.setItem(key1, value1);
+				storage.setItem(key2, value2);
+				storage.setItem(key3, value3);
+				storage.setItem(key4, value4);
+				// Inspect localStorage directly.
+				// Data is stored somewhat cryptic so check the actual expected value.
+				expect(localStorage.getItem(key1).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
+				expect(localStorage.getItem(key2).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
+				expect(localStorage.getItem(key3).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
+				expect(localStorage.getItem(key4).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
+			});
+
+			it('should get data from local storage by key', function() {
+				// now use the object's API and we should get back what we put in
+				// whether from Local explicitly...
+				expect(storage.getLocalItem(key1)).to.equal(value1);
+				expect(storage.getLocalItem(key2)).to.equal(value2);
+				expect(storage.getLocalItem(key3)).to.deep.equal(value3);
+				expect(storage.getLocalItem(key4)).to.deep.equal(value4);
+				// ...or implicitly
+				expect(storage.getItem(key1)).to.equal(value1);
+				expect(storage.getItem(key2)).to.equal(value2);
+				expect(storage.getItem(key3)).to.deep.equal(value3);
+				expect(storage.getItem(key4)).to.deep.equal(value4);
+			});
+		});
+
+		describe('should support config of session storage', function() {
+
+			it('should set configured storage type to session storage', function() {
+				// housekeeping, make sure we start with a clean slate
+				storage.clearLocal();
+				delete storage._type;
+
+				storage.setType('session');
+				expect(storage._type).to.equal('session');
+				expect(storage._getDaStorage()).to.equal(sessionStorage);
+			});
+
+			it('should set data in configured (session) storage by key', function() {
+				storage.setItem(key1, value1);
+				storage.setItem(key2, value2);
+				storage.setItem(key3, value3);
+				storage.setItem(key4, value4);
+				// Inspect sessionStorage directly.
+				// Data is stored somewhat cryptic so check the actual expected value.
+				expect(sessionStorage.getItem(key1).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
+				expect(sessionStorage.getItem(key2).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
+				expect(sessionStorage.getItem(key3).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
+				expect(sessionStorage.getItem(key4).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
+			});
+
+			it('should get data from session storage by key', function() {
+				// now use the object's API and we should get back what we put in
+				// whether from Session explicitly...
+				expect(storage.getSessionItem(key1)).to.equal(value1);
+				expect(storage.getSessionItem(key2)).to.equal(value2);
+				expect(storage.getSessionItem(key3)).to.deep.equal(value3);
+				expect(storage.getSessionItem(key4)).to.deep.equal(value4);
+				// ...or implicitly
+				expect(storage.getItem(key1)).to.equal(value1);
+				expect(storage.getItem(key2)).to.equal(value2);
+				expect(storage.getItem(key3)).to.deep.equal(value3);
+				expect(storage.getItem(key4)).to.deep.equal(value4);
+			});
+
+		});
+
+		describe('should support config default of session storage', function() {
+
+			it('should default to session storage', function() {
+				// housekeeping, make sure we start with a clean slate
+				storage.clearLocal();
+				delete storage._type;
+
+				expect(storage._getDaStorage()).to.equal(sessionStorage);
+			});
+
+			it('should set data in default (session) storage by key', function() {
+				storage.setItem(key1, value1);
+				storage.setItem(key2, value2);
+				storage.setItem(key3, value3);
+				storage.setItem(key4, value4);
+				// Inspect sessionStorage directly.
+				// Data is stored somewhat cryptic so check the actual expected value.
+				expect(sessionStorage.getItem(key1).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
+				expect(sessionStorage.getItem(key2).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
+				expect(sessionStorage.getItem(key3).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
+				expect(sessionStorage.getItem(key4).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
+			});
+
+			it('should get data from session storage by key', function() {
+				// now use the object's API and we should get back what we put in
+				// whether from Session explicitly...
+				expect(storage.getSessionItem(key1)).to.equal(value1);
+				expect(storage.getSessionItem(key2)).to.equal(value2);
+				expect(storage.getSessionItem(key3)).to.deep.equal(value3);
+				expect(storage.getSessionItem(key4)).to.deep.equal(value4);
+				// ...or implicitly
+				expect(storage.getItem(key1)).to.equal(value1);
+				expect(storage.getItem(key2)).to.equal(value2);
+				expect(storage.getItem(key3)).to.deep.equal(value3);
+				expect(storage.getItem(key4)).to.deep.equal(value4);
+			});
+		});
+	});
 });

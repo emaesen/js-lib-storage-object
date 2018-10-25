@@ -270,6 +270,9 @@ storage.clearNamespaced = function(ns, type) {
 	}
 };
 
+storage.setType = function(type) {
+	storage._type = type;
+};
 // internal method to determine if cookie should be used for storage
 storage._shouldUseCookie = function(type){
 	return type === "cookie" || (!this._hasSupportedStorageType(type) && this.fallbackToCookie);
@@ -277,6 +280,7 @@ storage._shouldUseCookie = function(type){
 // internal method to get one of the three storage types.
 // (or auto fallback to memoryStore)
 storage._getDaStorage = function(type) {
+	type = type || storage._type || "session";
 	switch(type) {
 		case "local":
 			return this._hasSupportedStorageType(type)? localStorage : this.memoryStore._localStorage;
