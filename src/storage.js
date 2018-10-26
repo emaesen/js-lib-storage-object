@@ -4,23 +4,18 @@
 // to access localStorage, sessionStorage or a memoryStore.
 // Cookies are supported to a limited extend.
 
-
-var fallbackToCookie = false;
-var clearExpiredLocal = true;
-var clearExpiredSession = true;
-
-var localStorage = this.localStorage;
-var sessionStorage = this.sessionStorage;
-
 // define storage object with memoryStore and configuration to fallback to
 // cookie. By default there's only fallback to memory storage since many
 // data objects probably are too large to store in cookie anyway.
 var storage = {
-	fallbackToCookie: fallbackToCookie,
+	fallbackToCookie: false,
+	clearExpiredLocal: true,
+	clearExpiredSession: true,
 	memoryStore: {
 		_sessionStorage: {},
 		_localStorage: {}
-	}
+	},
+	_enableUndo: false
 };
 
 // Let's see if storage is supported and available.
@@ -48,6 +43,14 @@ try {
 		storage.supportsLocalStorage = false;
 }
 storage.supportsDaStorage = storage.supportsSessionStorage && storage.supportsLocalStorage;
+
+
+
+/*
+ *************************************
+ * COOKIE functions
+ **************************************
+ */
 
 /* cookie helper functions - can be used as fallback for localStorage (default 1 year expiry unless isSession==true) */
 storage.setInCookie = function(key, value, isSession, expHours, domain, path, secure){
@@ -90,6 +93,26 @@ storage.expireCookie = function(key, cookieDomain){
 };
 
 /*
+ *************************************
+ * STORAGE functions
+ **************************************
+ */
+
+ // set storage type to be used unless otherwise explicitly specified in
+ // subsequent calls.
+ // Define `type`="local" for localStorage
+ // or `type`="session" for sessionStorage
+storage.setType = function(type) {
+	storage._type = type;
+};
+
+// enable undo functionality
+storage.enableUndo = function(bool) {
+	bool = (bool === undefined) ? true : bool;
+	storage._enableUndo = bool;
+};
+
+/*
  * storage functions: `key` (string), `value` (string or json object). All
  * values are stored as stringified json. `type` indicates whether to store
  * in "session"Storage (default), "local"Storage or "memory".
@@ -104,6 +127,8 @@ storage.setItem = function(key, value, type, exp){
 	var success = false;
 	var dastorage = this._getDaStorage(type);
 	var timestamp = (new Date()).getTime();
+	key = this._getKeyName(key);
+	this._setUndo(key, type);
 
 	if(value == null){
 		this.removeItem(key, type, dastorage);
@@ -144,6 +169,7 @@ storage.setItem = function(key, value, type, exp){
 storage.getItem = function(key, type, dastorage){
 	var jsonv;
 	var jsonvStr;
+	key = this._getKeyName(key);
 	dastorage = dastorage || this._getDaStorage(type);
 	if (this._shouldUseCookie(type)) {
 		jsonvStr = storage.getFromCookie(key);
@@ -213,6 +239,7 @@ storage.getLength = function(type, dastorage) {
 // remove the key/value pair for a given key
 // NO COOKIE SUPPORT
 storage.removeItem = function(key, type, dastorage){
+	key = this._getKeyName(key);
 	dastorage = dastorage || this._getDaStorage(type);
 	if (dastorage.removeItem) {
 		// this is for either localStorage or sessionStorage
@@ -270,9 +297,37 @@ storage.clearNamespaced = function(ns, type) {
 	}
 };
 
-storage.setType = function(type) {
-	storage._type = type;
+// reset key to previously stored undo value and return that value
+storage.undoItem = function(key, type) {
+	if(storage._enableUndo) {
+		var undoPropName = this._getUndoPropName(key, type);
+		var undoValue = storage[undoPropName];
+		this.setItem(key, undoValue, type);
+		return this.getItem(key, type);
+	}
 };
+
+// internal method to determine storage type
+storage._getType = function(type) {
+	return type || storage._type || "session";
+}
+// internal method to derive key name
+storage._getKeyName = function(key) {
+	return key.replace(/ /g, '');
+}
+// internal method to determine property name for undo item value
+storage._getUndoPropName = function(key, type) {
+	type = this._getType(type);
+	return '_undo_' + type + '_' + key;
+}
+// internal method to store undo value
+storage._setUndo = function(key, type) {
+	if(storage._enableUndo) {
+		var undoPropName = this._getUndoPropName(key, type);
+		storage[undoPropName] = this.getItem(key, type);
+	}
+}
+
 // internal method to determine if cookie should be used for storage
 storage._shouldUseCookie = function(type){
 	return type === "cookie" || (!this._hasSupportedStorageType(type) && this.fallbackToCookie);
@@ -280,7 +335,7 @@ storage._shouldUseCookie = function(type){
 // internal method to get one of the three storage types.
 // (or auto fallback to memoryStore)
 storage._getDaStorage = function(type) {
-	type = type || storage._type || "session";
+	type = this._getType(type);
 	switch(type) {
 		case "local":
 			return this._hasSupportedStorageType(type)? localStorage : this.memoryStore._localStorage;
@@ -325,6 +380,9 @@ storage.clearLocalExpired = function() {
 storage.clearLocalNamespaced = function(ns) {
 	return storage.clearNamespaced(ns, "local");
 };
+storage.undoLocalItem = function(key) {
+	return storage.undoItem(key, "local");
+};
 
 // convenience methods for sessionStorage
 storage.setSessionItem = function(key, value, exp) {
@@ -351,8 +409,11 @@ storage.clearSessionExpired = function() {
 storage.clearSessionNamespaced = function(ns) {
 	return storage.clearNamespaced(ns, "session");
 };
+storage.undoSessionItem = function(key) {
+	return storage.undoItem(key, "session");
+};
 
 // on initialization, clear any expired items from browser Storage
-if (clearExpiredLocal) {storage.clearExpired("local");}
+if (storage.clearExpiredLocal) {storage.clearExpired("local");}
 // the sessionStorage is most likely empty, but run clearExpired just in case
-if (clearExpiredSession) {storage.clearExpired("session");}
+if (storage.clearExpiredSession) {storage.clearExpired("session");}

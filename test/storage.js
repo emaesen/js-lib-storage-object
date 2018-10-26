@@ -19,9 +19,9 @@ describe('Storage Object', function() {
 		console.log(" ");
 	});
 	var key1 = "key1";
-	var key2 = "key2";
+	var key2 = "key 2";
 	var key3 = "key3";
-	var key4 = "key4";
+	var key4 = "key 4";
 	var nskey = "myNameSpace:myKey";
 	var expkey = "expiringKey";
 
@@ -29,8 +29,14 @@ describe('Storage Object', function() {
 	var value2 = "single-quoted 'string'";
 	var value3 = {foo: "bar"};
 	var value4 = {name1: value1, name2: value2, name3: value3};
+	var value5 = "edit #1";
+	var value6 = "edit #2";
 	var nsvalue = "my namespaced value";
 	var expvalue = "my expiring value";
+
+	it('should use safe key names', function() {
+		expect(storage._getKeyName(' aa  b c')).to.equal('aabc');
+	});
 
 	describe('should support local storage', function() {
 
@@ -45,10 +51,10 @@ describe('Storage Object', function() {
 			storage.setLocalItem(key4, value4);
 			// Inspect localStorage directly.
 			// Data is stored somewhat cryptic so check the actual expected value.
-			expect(localStorage.getItem(key1).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
-			expect(localStorage.getItem(key2).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
-			expect(localStorage.getItem(key3).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
-			expect(localStorage.getItem(key4).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
+			expect(localStorage.getItem(storage._getKeyName(key1)).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
+			expect(localStorage.getItem(storage._getKeyName(key2)).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
+			expect(localStorage.getItem(storage._getKeyName(key3)).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
+			expect(localStorage.getItem(storage._getKeyName(key4)).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
 		});
 
 		it('should get data from local storage by key', function() {
@@ -60,10 +66,10 @@ describe('Storage Object', function() {
 		});
 
 		it('should get key from local storage by index', function() {
-			expect(storage.getLocalKey(0)).to.equal(key1);
-			expect(storage.getLocalKey(1)).to.equal(key2);
-			expect(storage.getLocalKey(2)).to.equal(key3);
-			expect(storage.getLocalKey(3)).to.equal(key4);
+			expect(storage.getLocalKey(0)).to.equal(storage._getKeyName(key1));
+			expect(storage.getLocalKey(1)).to.equal(storage._getKeyName(key2));
+			expect(storage.getLocalKey(2)).to.equal(storage._getKeyName(key3));
+			expect(storage.getLocalKey(3)).to.equal(storage._getKeyName(key4));
 		});
 
 		it('should get number of stored items from local storage', function() {
@@ -81,12 +87,12 @@ describe('Storage Object', function() {
 			// it is gone and check the Storage object to see that the number
 			// of stored items is reduced
 			storage.removeLocalItem(key1);
-			expect(localStorage.getItem(key1)).to.equal(null);
+			expect(localStorage.getItem(storage._getKeyName(key1))).to.equal(null);
 			expect(storage.getLocalItem(key1)).to.equal(null);
 			expect(storage.getLocalLength()).to.equal(3);
 			// remove one more item
 			storage.removeLocalItem(key3);
-			expect(localStorage.getItem(key3)).to.equal(null);
+			expect(localStorage.getItem(storage._getKeyName(key3))).to.equal(null);
 			expect(storage.getLocalItem(key3)).to.equal(null);
 			expect(storage.getLocalLength()).to.equal(2);
 		});
@@ -194,10 +200,10 @@ describe('Storage Object', function() {
 			storage.setSessionItem(key4, value4);
 			// Inspect sessionStorage directly.
 			// Data is stored somewhat cryptic so check the actual expected value.
-			expect(sessionStorage.getItem(key1).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
-			expect(sessionStorage.getItem(key2).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
-			expect(sessionStorage.getItem(key3).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
-			expect(sessionStorage.getItem(key4).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
+			expect(sessionStorage.getItem(storage._getKeyName(key1)).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
+			expect(sessionStorage.getItem(storage._getKeyName(key2)).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
+			expect(sessionStorage.getItem(storage._getKeyName(key3)).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
+			expect(sessionStorage.getItem(storage._getKeyName(key4)).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
 		});
 
 		it('should get data from session storage by key', function() {
@@ -209,10 +215,10 @@ describe('Storage Object', function() {
 		});
 
 		it('should get key from session storage by index', function() {
-			expect(storage.getSessionKey(0)).to.equal(key1);
-			expect(storage.getSessionKey(1)).to.equal(key2);
-			expect(storage.getSessionKey(2)).to.equal(key3);
-			expect(storage.getSessionKey(3)).to.equal(key4);
+			expect(storage.getSessionKey(0)).to.equal(storage._getKeyName(key1));
+			expect(storage.getSessionKey(1)).to.equal(storage._getKeyName(key2));
+			expect(storage.getSessionKey(2)).to.equal(storage._getKeyName(key3));
+			expect(storage.getSessionKey(3)).to.equal(storage._getKeyName(key4));
 		});
 
 		it('should get number of stored items from session storage', function() {
@@ -222,7 +228,7 @@ describe('Storage Object', function() {
 		it('should time-stamp data in session storage', function() {
 			// Inspect localStorage directly, it should have a _ts_ property with
 			// a 13-digit timestamp.
-			expect(sessionStorage.getItem(key1).search(/\^\^_ts_\^\^:\d{13}/) !== -1).to.equal(true);
+			expect(sessionStorage.getItem(storage._getKeyName(key1)).search(/\^\^_ts_\^\^:\d{13}/) !== -1).to.equal(true);
 		});
 
 		it('should remove data from session storage by key', function() {
@@ -230,12 +236,12 @@ describe('Storage Object', function() {
 			// it is gone and check the Storage object to see that the number
 			// of stored items is reduced
 			storage.removeSessionItem(key1);
-			expect(sessionStorage.getItem(key1)).to.equal(null);
+			expect(sessionStorage.getItem(storage._getKeyName(key1))).to.equal(null);
 			expect(storage.getSessionItem(key1)).to.equal(null);
 			expect(storage.getSessionLength()).to.equal(3);
 			// remove one more item
 			storage.removeSessionItem(key3);
-			expect(sessionStorage.getItem(key3)).to.equal(null);
+			expect(sessionStorage.getItem(storage._getKeyName(key3))).to.equal(null);
 			expect(storage.getSessionItem(key3)).to.equal(null);
 			expect(storage.getSessionLength()).to.equal(2);
 		});
@@ -248,7 +254,7 @@ describe('Storage Object', function() {
 		it('should get data from session storage by key unless it has expired, and should remove an expired item', function() {
 			var exp = 60 * 1000;
 			storage.setSessionItem(expkey, expvalue, exp);
-			var storedObj = JSON.parse(sessionStorage.getItem(expkey).replace(/\^\^/g, '\"'));
+			var storedObj = JSON.parse(sessionStorage.getItem(storage._getKeyName(expkey)).replace(/\^\^/g, '\"'));
 			// verify that the _exp_ time is set to the timestamp time at moment of
 			// storage plus the exp setting.
 			expect(storedObj._exp_ - storedObj._ts_).to.equal(exp);
@@ -262,7 +268,7 @@ describe('Storage Object', function() {
 			var nrItems = storage.getSessionLength();
 			// inspect internal variables (this is not ideal in a test case since
 			// it should be possible to change internals without breaking tests...)
-			storedObj = JSON.parse(sessionStorage.getItem(expkey).replace(/\^\^/g, '\"'));
+			storedObj = JSON.parse(sessionStorage.getItem(storage._getKeyName(expkey)).replace(/\^\^/g, '\"'));
 			expect(storedObj._exp_ - storedObj._ts_).to.equal(exp);
 			// now we should get null back if we try to access it again
 			expect(storage.getSessionItem(expkey)).to.equal(null);
@@ -349,8 +355,8 @@ describe('Storage Object', function() {
 			storage.setSessionItem(key1, value1);
 			storage.setSessionItem(key3, value3);
 			// inspect memoryStore directly to check that it has indeed be used
-			expect(storage.memoryStore._localStorage.key1.indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
-			expect(storage.memoryStore._sessionStorage.key3.indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
+			expect(storage.memoryStore._localStorage[key1].indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
+			expect(storage.memoryStore._sessionStorage[key3].indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
 			// next use the object's API and we should get back what we put in
 			// even though it is stored in memory instead of local/session storage.
 			expect(storage.getLocalItem(key1)).to.equal(value1);
@@ -457,10 +463,10 @@ describe('Storage Object', function() {
 				storage.setItem(key4, value4);
 				// Inspect localStorage directly.
 				// Data is stored somewhat cryptic so check the actual expected value.
-				expect(localStorage.getItem(key1).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
-				expect(localStorage.getItem(key2).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
-				expect(localStorage.getItem(key3).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
-				expect(localStorage.getItem(key4).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
+				expect(localStorage.getItem(storage._getKeyName(key1)).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
+				expect(localStorage.getItem(storage._getKeyName(key2)).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
+				expect(localStorage.getItem(storage._getKeyName(key3)).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
+				expect(localStorage.getItem(storage._getKeyName(key4)).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
 			});
 
 			it('should get data from local storage by key', function() {
@@ -482,7 +488,7 @@ describe('Storage Object', function() {
 
 			it('should set configured storage type to session storage', function() {
 				// housekeeping, make sure we start with a clean slate
-				storage.clearLocal();
+				storage.clearSession();
 				delete storage._type;
 
 				storage.setType('session');
@@ -497,10 +503,10 @@ describe('Storage Object', function() {
 				storage.setItem(key4, value4);
 				// Inspect sessionStorage directly.
 				// Data is stored somewhat cryptic so check the actual expected value.
-				expect(sessionStorage.getItem(key1).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
-				expect(sessionStorage.getItem(key2).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
-				expect(sessionStorage.getItem(key3).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
-				expect(sessionStorage.getItem(key4).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
+				expect(sessionStorage.getItem(storage._getKeyName(key1)).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
+				expect(sessionStorage.getItem(storage._getKeyName(key2)).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
+				expect(sessionStorage.getItem(storage._getKeyName(key3)).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
+				expect(sessionStorage.getItem(storage._getKeyName(key4)).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
 			});
 
 			it('should get data from session storage by key', function() {
@@ -523,7 +529,7 @@ describe('Storage Object', function() {
 
 			it('should default to session storage', function() {
 				// housekeeping, make sure we start with a clean slate
-				storage.clearLocal();
+				storage.clearSession();
 				delete storage._type;
 
 				expect(storage._getDaStorage()).to.equal(sessionStorage);
@@ -536,10 +542,10 @@ describe('Storage Object', function() {
 				storage.setItem(key4, value4);
 				// Inspect sessionStorage directly.
 				// Data is stored somewhat cryptic so check the actual expected value.
-				expect(sessionStorage.getItem(key1).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
-				expect(sessionStorage.getItem(key2).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
-				expect(sessionStorage.getItem(key3).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
-				expect(sessionStorage.getItem(key4).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
+				expect(sessionStorage.getItem(storage._getKeyName(key1)).indexOf('^^_data_^^:^^double-quoted \\^^string\\^^^^')).to.equal(1);
+				expect(sessionStorage.getItem(storage._getKeyName(key2)).indexOf('^^_data_^^:^^single-quoted \'string\'^^')).to.equal(1);
+				expect(sessionStorage.getItem(storage._getKeyName(key3)).indexOf('^^_data_^^:{^^foo^^:^^bar^^}')).to.equal(1);
+				expect(sessionStorage.getItem(storage._getKeyName(key4)).indexOf('^^_data_^^:{^^name1^^:^^double-quoted \\^^string\\^^^^,^^name2^^:^^single-quoted \'string\'^^,^^name3^^:{^^foo^^:^^bar^^}}')).to.equal(1);
 			});
 
 			it('should get data from session storage by key', function() {
@@ -557,4 +563,90 @@ describe('Storage Object', function() {
 			});
 		});
 	});
+
+	describe('should support in-memory undo functionality', function() {
+
+		it('should support enabling/disabling of undo', function() {
+			expect(storage._enableUndo).to.equal(false);
+			storage.enableUndo();
+			expect(storage._enableUndo).to.equal(true);
+			storage.enableUndo(false);
+			expect(storage._enableUndo).to.equal(false);
+		});
+
+		it('should support undo for local storage', function() {
+			// housekeeping, make sure we start with a clean slate
+			storage.clearLocal();
+			delete storage._type;
+			delete storage._localUndo;
+
+			storage.enableUndo(false);
+			storage.setLocalItem(key1, value5);
+			expect(storage['_undo_local_' + key1]).to.equal(undefined);
+			storage.setLocalItem(key1, value6);
+			expect(storage['_undo_local_' + key1]).to.equal(undefined);
+
+			storage.clearLocal();
+			delete storage._type;
+			delete storage['_undo_local_' + key1];
+
+			storage.enableUndo();
+			storage.setLocalItem(key1, value5);
+			expect(storage['_undo_local_' + key1]).to.equal(null);
+			storage.setLocalItem(key1, value6);
+			expect(storage['_undo_local_' + key1]).to.equal(value5);
+			expect(storage.getLocalItem(key1)).to.equal(value6);
+			expect(storage.undoLocalItem(key1)).to.equal(value5);
+			expect(storage.getLocalItem(key1)).to.equal(value5);
+		});
+
+		it('should support undo for session storage', function() {
+			// housekeeping, make sure we start with a clean slate
+			storage.clearSession();
+			delete storage._type;
+
+			storage.setSessionItem(key1, value5);
+			storage.setSessionItem(key1, value6);
+			expect(storage.getSessionItem(key1)).to.equal(value6);
+			expect(storage.undoSessionItem(key1)).to.equal(value5);
+			expect(storage.getSessionItem(key1)).to.equal(value5);
+		});
+
+
+		it('should support undo for configured storage', function() {
+			// housekeeping, make sure we start with a clean slate
+			storage.clearSession();
+			storage.clearLocal();
+
+			delete storage._type;
+			storage.setType('session');
+			expect(storage._type).to.equal('session');
+
+			storage.setItem(key1, value5);
+			storage.setItem(key1, value6);
+			expect(storage.getItem(key1)).to.equal(value6);
+			storage.undoItem(key1);
+			expect(storage.getItem(key1)).to.equal(value5);
+			expect(storage.getSessionItem(key1)).to.equal(value5);
+
+			// housekeeping, make sure we start with a clean slate
+			storage.clearSession();
+			storage.clearLocal();
+
+			delete storage._type;
+			storage.setType('local');
+			expect(storage._type).to.equal('local');
+
+			storage.setItem(key1, value5);
+			storage.setItem(key1, value6);
+			expect(storage.getItem(key1)).to.equal(value6);
+			expect(storage.undoItem(key1)).to.equal(value5);
+			expect(storage.getItem(key1)).to.equal(value5);
+			expect(storage.getLocalItem(key1)).to.equal(value5);
+
+		});
+
+	});
+
+
 });

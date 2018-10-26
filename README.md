@@ -30,10 +30,12 @@ Storage function signatures:
 // Define `type`="local" for localStorage
 // or `type`="session" for sessionStorage
 storage.setType(type)
+// enable undo functionality
+storage.enableUndo(bool)
 /*
  * storage functions:
  * `key` (string),
- *  The key string can be 'namespaced': "ns-key".
+ *  The key string can be 'namespaced': "ns:key".
  * `value` (string or json object).
  *  All values are stored as stringified json.
  * `type` indicates whether to store in "session"Storage (default),
@@ -46,6 +48,8 @@ storage.setType(type)
 storage.setItem(key, value, type, exp)
 // retrieve the value for the given key
 storage.getItem(key, type)
+// reset key to previously stored undo value and return that value
+storage.undoItem(key, type)
 // retrieve the i-th key in the list of stored keys
 storage.getKey(i, type)
 // return number of key/value pairs that are stored
