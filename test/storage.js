@@ -579,6 +579,7 @@ describe('Storage Object', function() {
 			storage.clearLocal();
 			delete storage._type;
 			delete storage._localUndo;
+			delete storage['_undo_local_' + key1];
 
 			storage.enableUndo(false);
 			storage.setLocalItem(key1, value5);
@@ -643,6 +644,101 @@ describe('Storage Object', function() {
 			expect(storage.undoItem(key1)).to.equal(value5);
 			expect(storage.getItem(key1)).to.equal(value5);
 			expect(storage.getLocalItem(key1)).to.equal(value5);
+
+		});
+
+	});
+
+
+	describe('should support in-memory redo functionality', function() {
+
+		it('should support redo for local storage', function() {
+			// housekeeping, make sure we start with a clean slate
+			storage.clearLocal();
+			delete storage._type;
+			delete storage._localUndo;
+			delete storage['_undo_local_' + key1];
+
+			// redo is nothing more than a repeat of the undo
+			storage.enableUndo();
+			storage.setLocalItem(key1, value5);
+			expect(storage['_undo_local_' + key1]).to.equal(null);
+			storage.setLocalItem(key1, value6);
+			expect(storage['_undo_local_' + key1]).to.equal(value5);
+			expect(storage.getLocalItem(key1)).to.equal(value6);
+			// undo the last action
+			expect(storage.undoLocalItem(key1)).to.equal(value5);
+			expect(storage['_undo_local_' + key1]).to.equal(value6);
+			expect(storage.getLocalItem(key1)).to.equal(value5);
+			// redo (=undo the undo) the last action
+			expect(storage.undoLocalItem(key1)).to.equal(value6);
+			expect(storage.getLocalItem(key1)).to.equal(value6);
+			// maybe be repeated again and again
+			expect(storage.undoLocalItem(key1)).to.equal(value5);
+			expect(storage.undoLocalItem(key1)).to.equal(value6);
+			expect(storage.undoLocalItem(key1)).to.equal(value5);
+			expect(storage.undoLocalItem(key1)).to.equal(value6);
+		});
+
+		it('should support redo for session storage', function() {
+			// housekeeping, make sure we start with a clean slate
+			storage.clearSession();
+			delete storage._type;
+			delete storage._sessionUndo;
+			delete storage['_undo_session_' + key1];
+
+			// redo is nothing more than a repeat of the undo
+			storage.enableUndo();
+			storage.setSessionItem(key1, value5);
+			expect(storage['_undo_session_' + key1]).to.equal(null);
+			storage.setSessionItem(key1, value6);
+			expect(storage['_undo_session_' + key1]).to.equal(value5);
+			expect(storage.getSessionItem(key1)).to.equal(value6);
+			// undo the last action
+			expect(storage.undoSessionItem(key1)).to.equal(value5);
+			expect(storage['_undo_session_' + key1]).to.equal(value6);
+			expect(storage.getSessionItem(key1)).to.equal(value5);
+			// redo (=undo the undo) the last action
+			expect(storage.undoSessionItem(key1)).to.equal(value6);
+			expect(storage.getSessionItem(key1)).to.equal(value6);
+			// maybe be repeated again and again
+			expect(storage.undoSessionItem(key1)).to.equal(value5);
+			expect(storage.undoSessionItem(key1)).to.equal(value6);
+			expect(storage.undoSessionItem(key1)).to.equal(value5);
+			expect(storage.undoSessionItem(key1)).to.equal(value6);
+		});
+
+
+		it('should support redo for configured storage', function() {
+			// housekeeping, make sure we start with a clean slate
+			storage.clearSession();
+			storage.clearLocal();
+
+			storage.setType('session');
+			storage.setItem(key1, value5);
+			storage.setItem(key1, value6);
+			expect(storage.getItem(key1)).to.equal(value6);
+			storage.undoItem(key1);
+			expect(storage.getItem(key1)).to.equal(value5);
+			expect(storage.getSessionItem(key1)).to.equal(value5);
+			storage.undoItem(key1);
+			expect(storage.getItem(key1)).to.equal(value6);
+			expect(storage.getSessionItem(key1)).to.equal(value6);
+
+			// housekeeping, make sure we start with a clean slate
+			storage.clearSession();
+			storage.clearLocal();
+
+			storage.setType('local');
+			storage.setItem(key1, value5);
+			storage.setItem(key1, value6);
+			expect(storage.getItem(key1)).to.equal(value6);
+			expect(storage.undoItem(key1)).to.equal(value5);
+			expect(storage.getItem(key1)).to.equal(value5);
+			expect(storage.getLocalItem(key1)).to.equal(value5);
+			expect(storage.undoItem(key1)).to.equal(value6);
+			expect(storage.getItem(key1)).to.equal(value6);
+			expect(storage.getLocalItem(key1)).to.equal(value6);
 
 		});
 
