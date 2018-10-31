@@ -81,14 +81,14 @@ storage.getFromCookie = function(key){
 };
 
 storage.eraseCookie = function(key){
-	storage.setInCookie(key, "", true);
+	this.setInCookie(key, "", true);
 };
 
 storage.expireCookie = function(key, cookieDomain){
-	storage.setInCookie(key, "", false, -1000, cookieDomain);
+	this.setInCookie(key, "", false, -1000, cookieDomain);
 	if(cookieDomain.match(/\.[^.]+\.[^.]+\./)){
 		//clear parent domain as well;
-		storage.setInCookie(key, "", false, -1000, cookieDomain.replace(/\.[^.]+/,""));
+		this.setInCookie(key, "", false, -1000, cookieDomain.replace(/\.[^.]+/,""));
 	}
 };
 
@@ -103,14 +103,15 @@ storage.expireCookie = function(key, cookieDomain){
  // Define `type`="local" for localStorage
  // or `type`="session" for sessionStorage
 storage.setType = function(type) {
-	storage._type = type;
+	this._type = type;
 };
 
 // enable undo functionality
 storage.enableUndo = function(bool) {
 	bool = (bool === undefined) ? true : bool;
-	storage._enableUndo = bool;
+	this._enableUndo = bool;
 };
+
 
 /*
  * storage functions: `key` (string), `value` (string or json object). All
@@ -144,7 +145,7 @@ storage.setItem = function(key, value, type, exp){
 		//Opera Mini (and maybe others) does not store values with double quotes, so replace them;
 		var jsonvStr = JSON.stringify(jsonv).replace(/"/g, "^^");
 		if (this._shouldUseCookie(type)) {
-			storage.setInCookie(key, jsonvStr);
+			this.setInCookie(key, jsonvStr);
 		} else {
 			// first do some housekeeping and remove expired items
 			this.clearExpired(type);
@@ -172,7 +173,7 @@ storage.getItem = function(key, type, dastorage){
 	key = this._getKeyName(key);
 	dastorage = dastorage || this._getDaStorage(type);
 	if (this._shouldUseCookie(type)) {
-		jsonvStr = storage.getFromCookie(key);
+		jsonvStr = this.getFromCookie(key);
 	} else {
 		if (typeof dastorage.getItem !== "undefined") {
 			jsonvStr = dastorage.getItem(key);
@@ -299,7 +300,7 @@ storage.clearNamespaced = function(ns, type) {
 
 // reset key to previously stored undo value and return that value
 storage.undoItem = function(key, type) {
-	if(storage._enableUndo) {
+	if(this._enableUndo) {
 		var undoPropName = this._getUndoPropName(key, type);
 		var undoValue = storage[undoPropName];
 		this.setItem(key, undoValue, type);
@@ -309,7 +310,7 @@ storage.undoItem = function(key, type) {
 
 // internal method to determine storage type
 storage._getType = function(type) {
-	return type || storage._type || "session";
+	return type || this._type || "session";
 }
 // internal method to derive key name
 storage._getKeyName = function(key) {
@@ -322,7 +323,7 @@ storage._getUndoPropName = function(key, type) {
 }
 // internal method to store undo value
 storage._setUndo = function(key, type) {
-	if(storage._enableUndo) {
+	if(this._enableUndo) {
 		var undoPropName = this._getUndoPropName(key, type);
 		storage[undoPropName] = this.getItem(key, type);
 	}
@@ -357,60 +358,60 @@ storage._hasSupportedStorageType = function(type) {
 
 // convenience methods for localStorage
 storage.setLocalItem = function(key, value, exp) {
-	return storage.setItem(key, value, "local", exp);
+	return this.setItem(key, value, "local", exp);
 };
 storage.getLocalItem = function(key) {
-	return storage.getItem(key, "local");
+	return this.getItem(key, "local");
 };
 storage.getLocalKey = function(i) {
-	return storage.getKey(i, "local");
+	return this.getKey(i, "local");
 };
 storage.getLocalLength = function() {
-	return storage.getLength("local");
+	return this.getLength("local");
 };
 storage.removeLocalItem = function(key) {
-	return storage.removeItem(key, "local");
+	return this.removeItem(key, "local");
 };
 storage.clearLocal = function() {
-	return storage.clear("local");
+	return this.clear("local");
 };
 storage.clearLocalExpired = function() {
-	return storage.clearExpired("local");
+	return this.clearExpired("local");
 };
 storage.clearLocalNamespaced = function(ns) {
-	return storage.clearNamespaced(ns, "local");
+	return this.clearNamespaced(ns, "local");
 };
 storage.undoLocalItem = function(key) {
-	return storage.undoItem(key, "local");
+	return this.undoItem(key, "local");
 };
 
 // convenience methods for sessionStorage
 storage.setSessionItem = function(key, value, exp) {
-	return storage.setItem(key, value, "session", exp);
+	return this.setItem(key, value, "session", exp);
 };
 storage.getSessionItem = function(key) {
-	return storage.getItem(key, "session");
+	return this.getItem(key, "session");
 };
 storage.getSessionKey = function(i) {
-	return storage.getKey(i, "session");
+	return this.getKey(i, "session");
 };
 storage.getSessionLength = function() {
-	return storage.getLength("session");
+	return this.getLength("session");
 };
 storage.removeSessionItem = function(key) {
-	return storage.removeItem(key, "session");
+	return this.removeItem(key, "session");
 };
 storage.clearSession = function() {
-	return storage.clear("session");
+	return this.clear("session");
 };
 storage.clearSessionExpired = function() {
-	return storage.clearExpired("session");
+	return this.clearExpired("session");
 };
 storage.clearSessionNamespaced = function(ns) {
-	return storage.clearNamespaced(ns, "session");
+	return this.clearNamespaced(ns, "session");
 };
 storage.undoSessionItem = function(key) {
-	return storage.undoItem(key, "session");
+	return this.undoItem(key, "session");
 };
 
 // on initialization, clear any expired items from browser Storage
