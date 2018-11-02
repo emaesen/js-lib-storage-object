@@ -647,6 +647,25 @@ describe('Storage Object', function() {
 
 		});
 
+		it('should return current item when undo is not enabled', function() {
+			// housekeeping, make sure we start with a clean slate
+			storage.clearLocal();
+			delete storage._type;
+			delete storage._localUndo;
+			delete storage['_undo_local_' + key1];
+			delete storage._sessionUndo;
+			delete storage['_undo_session_' + key1];
+
+			storage.enableUndo(false);
+			storage.setLocalItem(key1, value5);
+			storage.setLocalItem(key1, value6);
+			expect(storage.undoLocalItem(key1)).to.equal(value6);
+
+			storage.setSessionItem(key1, value5);
+			storage.setSessionItem(key1, value6);
+			expect(storage.undoSessionItem(key1)).to.equal(value6);
+		});
+
 	});
 
 

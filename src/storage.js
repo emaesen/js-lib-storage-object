@@ -304,8 +304,8 @@ storage.undoItem = function(key, type) {
 		var undoPropName = this._getUndoPropName(key, type);
 		var undoValue = storage[undoPropName];
 		this.setItem(key, undoValue, type);
-		return this.getItem(key, type);
 	}
+	return this.getItem(key, type);
 };
 
 // internal method to determine storage type
